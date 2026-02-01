@@ -13,6 +13,7 @@ Author: Deniz
 """
 
 import json
+import argparse
 from datetime import datetime
 from pathlib import Path
 
@@ -25,7 +26,8 @@ COST_THRESHOLD_HIGH = 100.0  # Monthly cost above this is flagged as expensive
 def load_inventory(file_path: str) -> dict:
     """Load cloud inventory from JSON file."""
     try:
-        with open(file_path, 'r') as f:
+        # Use utf-8-sig to handle Windows BOM (Byte Order Mark)
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"❌ Error: Inventory file '{file_path}' not found!")
@@ -211,8 +213,35 @@ def print_recommendations(analysis: dict, idle_instances: list):
         print(f"   {i}. {rec}")
 
 
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Cloud Cost Optimizer - Analyze and optimize AWS instance costs",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python cloud_cost_optimizer.py              # Interactive mode
+  python cloud_cost_optimizer.py --auto       # Auto-shutdown idle instances
+  python cloud_cost_optimizer.py --dry-run    # Report only, no changes
+        """
+    )
+    parser.add_argument(
+        "--auto", 
+        action="store_true",
+        help="Automatically shut down idle instances without prompting"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true", 
+        help="Run analysis only, do not make any changes"
+    )
+    return parser.parse_args()
+
+
 def main():
     """Main function to run the cloud cost optimizer."""
+    args = parse_arguments()
+    
     script_dir = Path(__file__).parent
     inventory_path = script_dir / INVENTORY_FILE
     
@@ -237,14 +266,24 @@ def main():
     # Simulate shutdown of idle instances
     if idle_instances:
         print("\n" + "=" * 70)
-        user_input = input("🔄 Shut down idle instances? (yes/no): ").strip().lower()
         
-        if user_input in ['yes', 'y']:
+        if args.dry_run:
+            print("   🔍 DRY RUN MODE - No changes will be made")
+        elif args.auto:
+            print("   🤖 AUTO MODE - Shutting down idle instances...")
             savings = shutdown_idle_instances(inventory, idle_instances)
             save_inventory(inventory_path, inventory)
             print_optimization_results(len(idle_instances), savings)
         else:
-            print("   ℹ️  No changes made. Idle instances remain running.")
+            # Interactive mode
+            user_input = input("🔄 Shut down idle instances? (yes/no): ").strip().lower()
+            
+            if user_input in ['yes', 'y']:
+                savings = shutdown_idle_instances(inventory, idle_instances)
+                save_inventory(inventory_path, inventory)
+                print_optimization_results(len(idle_instances), savings)
+            else:
+                print("   ℹ️  No changes made. Idle instances remain running.")
     
     # Print recommendations
     print_recommendations(analysis, idle_instances)

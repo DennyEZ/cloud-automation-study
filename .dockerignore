@@ -1,0 +1,44 @@
+# Docker ignore file - exclude unnecessary files from build context
+# This speeds up builds and reduces image size
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation
+*.md
+docs/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Local config
+.env
+.env.local
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
