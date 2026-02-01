@@ -18,7 +18,8 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-INVENTORY_FILE = "cloud_inventory.json"
+INVENTORY_FILE = "cloud_inventory.json"  # Input file 
+OUTPUT_FILE = "cloud_inventory_output.json"  # Output file (contains changes)
 CPU_THRESHOLD = 5.0  # Servers with CPU usage below this are considered idle
 COST_THRESHOLD_HIGH = 100.0  # Monthly cost above this is flagged as expensive
 
@@ -244,6 +245,7 @@ def main():
     
     script_dir = Path(__file__).parent
     inventory_path = script_dir / INVENTORY_FILE
+    output_path = script_dir / OUTPUT_FILE
     
     # Load inventory
     print("📂 Loading cloud inventory...")
@@ -272,7 +274,7 @@ def main():
         elif args.auto:
             print("   🤖 AUTO MODE - Shutting down idle instances...")
             savings = shutdown_idle_instances(inventory, idle_instances)
-            save_inventory(inventory_path, inventory)
+            save_inventory(output_path, inventory)
             print_optimization_results(len(idle_instances), savings)
         else:
             # Interactive mode
@@ -280,7 +282,7 @@ def main():
             
             if user_input in ['yes', 'y']:
                 savings = shutdown_idle_instances(inventory, idle_instances)
-                save_inventory(inventory_path, inventory)
+                save_inventory(output_path, inventory)
                 print_optimization_results(len(idle_instances), savings)
             else:
                 print("   ℹ️  No changes made. Idle instances remain running.")

@@ -24,12 +24,16 @@ A Python-based cloud cost optimization tool that analyzes AWS instance inventory
 
 ```
 cloud-automation-study/
-├── cloud_cost_optimizer.py   # Main Python script
-├── cloud_inventory.json      # Fake AWS instance data
-├── Dockerfile                # Container definition
-├── .dockerignore             # Docker build exclusions
-└── README.md                 # This file
+├── cloud_cost_optimizer.py      # Main Python script
+├── cloud_inventory.json         # Input: Fake AWS instance data (never modified)
+├── cloud_inventory_output.json  # Output: Generated results (git-ignored)
+├── Dockerfile                   # Container definition
+├── .dockerignore                # Docker build exclusions
+├── .gitignore                   # Git exclusions
+└── README.md                    # This file
 ```
+
+> **Note:** The script reads from `cloud_inventory.json` and writes changes to `cloud_inventory_output.json`. This keeps the original data clean for testing!
 
 ## 🚀 Quick Start
 
